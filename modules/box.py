@@ -27,3 +27,9 @@ class Box():
             if event.key == K_DOWN:
                 self.y += 10
 
+    def moveIfCollideWithOtherBoxList(self, boxes, event):
+        boxesWithoutHimself = [box for box in boxes if box != self]
+        if self.rect.collidelist(boxesWithoutHimself) != -1:
+            for index in self.rect.collidelistall(boxesWithoutHimself):
+                boxesWithoutHimself[index].move(event)
+    
