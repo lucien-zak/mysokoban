@@ -27,8 +27,3 @@ class Box():
             if event.key == K_DOWN:
                 self.y += 10
 
-    def moveIfCollide(self, boxes, event):
-        for box in boxes:
-            if self.rect.colliderect(box.rect) and self != box:
-                box.move(event)
-                

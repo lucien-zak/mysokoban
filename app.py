@@ -2,6 +2,8 @@ import pygame
 from pygame.locals import *
 from modules.player import Player
 from modules.box import Box
+import os
+
 
 pygame.init()
 screen = pygame.display.set_mode((1024, 720))
@@ -10,14 +12,14 @@ box1 = Box(100, 200, 50, 50, (0, 0, 255), screen)
 box2 = Box(100, 300, 50, 50, (0, 0, 255), screen)
 boxes = [box1, box2]
 
+
 running = 1
 
 def detectCollideBoxes(boxes):
     for box in boxes:
         for box2 in boxes:
             if box != box2 and box.rect.colliderect(box2.rect):
-                print("collide")
-                box2.move(event)
+                box1.move(event)
                 return
                 
 
