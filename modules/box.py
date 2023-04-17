@@ -2,7 +2,7 @@ import pygame
 from pygame.locals import *
 
 
-class Player():
+class Box():
 
     def __init__(self, x, y, width, height, color, screen):
         self.x = x
@@ -19,7 +19,7 @@ class Player():
     def move(self, event):
         if event.type == KEYDOWN:
             if event.key == K_LEFT:
-                 self.x -= 10
+                self.x -= 10
             if event.key == K_RIGHT:
                 self.x += 10
             if event.key == K_UP:
@@ -27,9 +27,8 @@ class Player():
             if event.key == K_DOWN:
                 self.y += 10
 
-    def detectAndMoveIfCollide(self, boxes, event):
+    def moveIfCollide(self, boxes, event):
         for box in boxes:
-            if self.rect.colliderect(box):
+            if self.rect.colliderect(box.rect) and self != box:
                 box.move(event)
-                pygame.display.flip()
-    
+                
