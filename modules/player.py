@@ -2,16 +2,6 @@ import pygame
 from pygame.locals import *
 import os
 
-def loadImages(path):
-    images = []
-    for file in os.listdir(path):
-        if file.endswith(".png"):
-            images.append(pygame.image.load(os.path.join(path, file)))
-    return images
-
-IMAGES = loadImages("assets")
-print(IMAGES)
-
 class Player(pygame.sprite.Sprite):
 
     def __init__(self, x, y, width, height, color, screen):
@@ -21,8 +11,10 @@ class Player(pygame.sprite.Sprite):
         self.height = height
         self.color = color
         self.screen = screen
-        self.image = pygame.transform.scale(IMAGES[0], (self.width, self.height))
+        self.image = pygame.transform.scale(pygame.image.load(os.path.join("assets", "personnage.png")), (self.width, self.height))
+        
         self.rect = pygame.draw.rect(self.screen, self.color, (self.x, self.y, self.width, self.height))
+        self.lastMove = (self.x, self.y)
 
     def draw(self):
         self.rect = pygame.draw.rect(self.screen, self.color, (self.x, self.y, self.width, self.height))
@@ -30,6 +22,7 @@ class Player(pygame.sprite.Sprite):
 
     def move(self, event):
         if event.type == KEYDOWN:
+            self.lastMove = (self.x, self.y)
             if event.key == K_LEFT:
                  self.x -= 10
             if event.key == K_RIGHT:
@@ -39,9 +32,6 @@ class Player(pygame.sprite.Sprite):
             if event.key == K_DOWN:
                 self.y += 10
 
-    def detectAndMoveIfCollide(self, boxes, event):
-        for box in boxes:
-            if self.rect.colliderect(box):
-                box.move(event)
-                pygame.display.flip()
-    
+    def moveBack(self):
+        self.x = self.lastMove[0]
+        self.y = self.lastMove[1]
