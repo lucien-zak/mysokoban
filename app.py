@@ -5,6 +5,7 @@ from modules.player import Player
 from modules.box import Box
 from modules.wall import Wall
 from modules.utils import Utils
+from modules.hole import Hole
 
 
 pygame.init()
@@ -13,17 +14,18 @@ HEIGHT = 720
 pygame.display.set_caption('Sokoban')
 MAPS = [
     ['W', 'W', 'W', 'W', 'W', 'W'],
-    ['W', '.', 'P', '.', '.', 'W'],
-    ['W', '.', 'B', '.', '.', 'W'],
-    ['W', '.', '.', '.', '.', 'W'],
+    ['W', 'H', 'P', '.', '.', 'W'],
+    ['W', 'B', 'B', '.', '.', 'W'],
+    ['W', '.', 'H', '.', '.', 'W'],
     ['W', 'W', 'W', 'W', 'W', 'W'],
 
 ]
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 
+
 def generateMaps(MAPS):
     nbRow, nbCol = 0, 0
-    walls, boxes = [], []
+    walls, boxes, holes = [], [], []
     for row in MAPS:
         nbRow += 1
         nbCol = 0
@@ -38,11 +40,17 @@ def generateMaps(MAPS):
                 boxes.append(box)
             if char == 'P':
                 player = Player((nbCol - 1) * 50, (nbRow - 1) * 50, 50, 50, (255, 0, 0), screen)
-    return nbRow, nbCol, walls, boxes, player
+            if char == 'H':
+                hole = Hole((nbCol - 1) * 50, (nbRow - 1) * 50, 50, screen)
+                holes.append(hole)
+    return nbRow, nbCol, walls, boxes, holes, player
 
-nbRow, nbCol, walls, boxes, player = generateMaps(MAPS)
+
+nbRow, nbCol, walls, boxes, holes, player = generateMaps(MAPS)
 
 running = 1
+
+boxInHole = 0
 
 
 while running:
@@ -53,6 +61,13 @@ while running:
             running = 0
         else:
             player.move(event)
+    for hole in holes:
+        hole.draw()
+        if hole.boxIsOnHole(boxes):
+            boxInHole += 1
+            if boxInHole == len(boxes):
+                print('You win')
+                running = 0    
     for wall in walls:
         wall.draw()
     for box in boxes:
@@ -61,7 +76,6 @@ while running:
         if box.rect.collidelist(walls) != -1:
             player.moveBack()
             box.moveBack()
-
     Utils.detectCollideBoxes(boxes, player, event, walls)
     pygame.display.flip()
 pygame.quit()
