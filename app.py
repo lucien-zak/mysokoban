@@ -13,11 +13,18 @@ WIDTH = 1024
 HEIGHT = 720
 pygame.display.set_caption('Sokoban')
 MAPS = [
-    ['W', 'W', 'W', 'W', 'W', 'W'],
-    ['W', 'H', 'P', '.', '.', 'W'],
-    ['W', 'B', 'B', '.', '.', 'W'],
-    ['W', '.', 'H', '.', '.', 'W'],
-    ['W', 'W', 'W', 'W', 'W', 'W'],
+    ['.', '.', '.','.', 'W', 'W','W', 'W', 'W','.','.','.','.','.','.','.','.','.',],
+    ['.', '.', '.','.', 'W', '.','.', '.', 'W','.','.','.','.','.','.','.','.','.',],
+    ['.', '.', 'W','W', 'W', '.','P', '.', 'W','W','.','.','.','.','.','.','.','.',],
+    ['.', '.', 'W','.', '.', '.','.', 'B', '.','W','.','.','.','.','.','.','.','.',],
+    ['W', 'W', 'W','.', 'W', '.','W', 'W', '.','W','.','.','W','W','W','W','W','W',],
+    ['W', '.', '.','.', 'W', '.','W', 'W', '.','W','W','W','W','.','.','.','H','W',],
+    ['W', '.', '.','.', '.', 'B','.', '.', '.','.','.','.','.','.','.','.','H','W',],
+    ['W', 'W', 'W','W', '.', '.','.', '.', '.','B','.','.','.','.','.','.','H','W',],
+    ['.', '.', '.','W', '.', 'B','W', 'W', 'W','.','.','W','W','.','.','.','H','W',],
+    ['.', '.', '.','W', '.', '.','.', '.', '.','.','.','W','W','W','W','W','W','W',],
+    ['.', '.', '.','W', 'W', 'W','W', 'W', 'W','.','.','W','.','.','.','.','.','.',],
+    ['.', '.', '.','.', '.', '.','.', '.', '.','W','W','.','.','.','.','.','.','.',],
 
 ]
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -32,50 +39,62 @@ def generateMaps(MAPS):
         for char in row:
             nbCol += 1
             if char == 'W':
-                print('W', nbRow)
                 wall = Wall((nbCol - 1) * 50, (nbRow - 1) * 50, 50, 50, 'black', screen)
                 walls.append(wall)
+            if char == 'H':
+                hole = Hole((nbCol - 1) * 50, (nbRow - 1) * 50, 50, screen)
+                holes.append(hole)
             if char == 'B':
                 box = Box((nbCol - 1) * 50, (nbRow - 1) * 50, 50, 50, (0, random.randrange(0, 255), 255), screen)
                 boxes.append(box)
             if char == 'P':
                 player = Player((nbCol - 1) * 50, (nbRow - 1) * 50, 50, 50, (255, 0, 0), screen)
-            if char == 'H':
-                hole = Hole((nbCol - 1) * 50, (nbRow - 1) * 50, 50, screen)
-                holes.append(hole)
     return nbRow, nbCol, walls, boxes, holes, player
 
 
-nbRow, nbCol, walls, boxes, holes, player = generateMaps(MAPS)
 
 running = 1
 
-boxInHole = 0
+boxInHole = []
+
+def gameLoop():
+    global boxInHole
+
+    nbRow, nbCol, walls, boxes, holes, player = generateMaps(MAPS)
+
+    while running:
+        screen.fill((120, 120, 120))
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+            else:
+                player.move(event)
+        Utils.detectCollideBoxes(boxes, player, event, walls)
+        for hole in holes:
+            hole.draw()
+            isInHole, indexBox = hole.boxIsOnHole(boxes)
+            if isInHole:
+                print(indexBox)
+                
+                boxInHole.append(indexBox)
+                boxes.pop(indexBox - 1)
+                hole.validateHole()
+                # if boxInHole == len(boxes):
+                #     print('You win')
+                #     pygame.quit()    
+        for wall in walls:
+            wall.draw()
+        for box in boxes:
+            box.moveIfCollideWithOtherBoxList(boxes, event, player)
+            box.draw()
+            if box.rect.collidelist(walls) != -1:
+                player.moveBack()
+                box.moveBack()
+        player.draw()
+        pygame.display.flip()
 
 
-while running:
-    screen.fill((120, 120, 120))
-    player.draw()
-    for event in pygame.event.get():
-        if event.type == QUIT:
-            running = 0
-        else:
-            player.move(event)
-    for hole in holes:
-        hole.draw()
-        if hole.boxIsOnHole(boxes):
-            boxInHole += 1
-            if boxInHole == len(boxes):
-                print('You win')
-                running = 0    
-    for wall in walls:
-        wall.draw()
-    for box in boxes:
-        box.draw()
-        box.moveIfCollideWithOtherBoxList(boxes, event, player)
-        if box.rect.collidelist(walls) != -1:
-            player.moveBack()
-            box.moveBack()
-    Utils.detectCollideBoxes(boxes, player, event, walls)
-    pygame.display.flip()
-pygame.quit()
+
+while True:
+    gameLoop()
+
